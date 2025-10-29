@@ -1,62 +1,36 @@
-import { useState, useEffect, useRef } from 'react';
+import { usePointerPosition } from './usePointerPosition.js';
+import { useDelayedValue } from './useDelayedValue.js';
 
-function Welcome() {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const duration = 1000;
-    const node = ref.current;
-
-    let startTime = performance.now();
-    let frameId = null;
-
-    function onFrame(now) {
-      const timePassed = now - startTime;
-      const progress = Math.min(timePassed / duration, 1);
-      onProgress(progress);
-      if (progress < 1) {
-        // We still have more frames to paint
-        frameId = requestAnimationFrame(onFrame);
-      }
-    }
-
-    function onProgress(progress) {
-      node.style.opacity = progress;
-    }
-
-    function start() {
-      onProgress(0);
-      startTime = performance.now();
-      frameId = requestAnimationFrame(onFrame);
-    }
-
-    function stop() {
-      cancelAnimationFrame(frameId);
-      startTime = null;
-      frameId = null;
-    }
-
-    start();
-    return () => stop();
-  }, []);
-
-  return (
-    <h1 className="welcome" ref={ref}>
-      Welcome
-    </h1>
-  );
-}
-
-export default function App() {
-  const [show, setShow] = useState(false);
+export default function Canvas() {
+  const pos1 = usePointerPosition();
+  const pos2 = useDelayedValue(pos1, 100);
+  const pos3 = useDelayedValue(pos2, 200);
+  const pos4 = useDelayedValue(pos3, 100);
+  const pos5 = useDelayedValue(pos4, 50);
   return (
     <>
-      <button onClick={() => setShow(!show)}>
-        {show ? 'Remove' : 'Show'}
-      </button>
-      <hr />
-      {show && <Welcome />}
+      <Dot position={pos1} opacity={1} />
+      <Dot position={pos2} opacity={0.8} />
+      <Dot position={pos3} opacity={0.6} />
+      <Dot position={pos4} opacity={0.4} />
+      <Dot position={pos5} opacity={0.2} />
     </>
   );
 }
 
+function Dot({ position, opacity }) {
+  return (
+    <div style={{
+      position: 'absolute',
+      backgroundColor: 'pink',
+      borderRadius: '50%',
+      opacity,
+      transform: `translate(${position.x}px, ${position.y}px)`,
+      pointerEvents: 'none',
+      left: -20,
+      top: -20,
+      width: 40,
+      height: 40,
+    }} />
+  );
+}
